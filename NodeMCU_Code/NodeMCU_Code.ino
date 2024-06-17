@@ -2,8 +2,8 @@
 #include <ESP8266HTTPClient.h>
 
 // Wi-Fi credentials
-const char* ssid = "Mali";
-const char* password = "abc@12345";
+const char* ssid = "Mali_Wifi";
+const char* password = "Mali$1234";
 
 // ThingSpeak credentials
 const char* tsServer = "api.thingspeak.com";
