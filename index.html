@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Data Display</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Smart Hand Glove</h1>
+  </header>
+  <div class="output" id="output">-: Result :-</div>
+  <div class="box">
+    
+    <div class="data" id="data"></div>
+  </div>
+  
+
+  <script>
+    var count=1;
+    function fetchData() {
+      fetch('https://api.thingspeak.com/channels/2184955/feeds.json?results=1')
+        .then(response => response.json())
+        .then(data => {
+          if (data.feeds && data.feeds.length > 0) {
+            console.log(count++);
+            const latestData = data.feeds[0];
+            const field1Value = latestData.field1;
+            const field2Value = latestData.field2;
+            const field3Value = latestData.field3;
+            const field4Value = latestData.field4;
+
+            // const field1Value = 210;
+            // const field2Value = 317;
+            // const field3Value = 299;
+            // const field4Value = 278;
+
+            console.log('field1:', field1Value);
+            console.log('field2:', field2Value);
+            console.log('field3:', field3Value);
+            console.log('field4:', field4Value);
+
+            const formData = new FormData();
+            formData.append('field1Value', field1Value);
+            formData.append('field2Value', field2Value);
+            formData.append('field3Value', field3Value);
+            formData.append('field4Value', field4Value);
+
+            fetch('run_python_script.php', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.text())
+              .then(outputData => {
+                let spokenText = '';
+                if(outputData=='Help'){
+                  spokenText = 'I Want Help';
+                } else if(outputData=='Washroom'){
+                  spokenText = 'I Want Go Washroom';
+                } else if(outputData=='Water'){
+                  spokenText = 'I Want Water';
+                } else if(outputData=='Food'){
+                  spokenText = 'I Am Hungry Give Me Food';
+                } else {
+                  spokenText = 'I Am Fine';
+                }
+
+                document.getElementById('data').textContent = spokenText;
+                console.log("Output: " + spokenText);
+
+                const message = new SpeechSynthesisUtterance(spokenText);
+                window.speechSynthesis.speak(message);
+              })
+              .catch(error => {
+                console.error('Error:', error);
+              });
+          } else {
+            console.log('No data available.');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    fetchData(); // Initial fetch
+
+    // Call fetchData every 10 seconds
+    setInterval(fetchData, 5000);
+  </script>
+</body>
+</html>
+
